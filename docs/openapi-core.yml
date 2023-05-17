@@ -165,7 +165,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateStock"
+                  "$ref": "#/components/schemas/CreateStockItem"
                 }
               }
             }
@@ -193,7 +193,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/AllStock"
+                    "$ref": "#/components/schemas/AllStockItems"
                   }
                 }
               }
@@ -358,10 +358,6 @@
             "description": {
               "type": "string",
               "example": "Input device for a computer"
-            },
-            "price": {
-              "type": "double",
-              "example": "19.99"
             }
           }
         },
@@ -375,10 +371,6 @@
             "description": {
               "type": "string",
               "example": "Input device for a computer"
-            },
-            "price": {
-              "type": "double",
-              "example": "19.99"
             }
           }
         },
@@ -391,4 +383,3 @@
       }
     }
   }
-}
