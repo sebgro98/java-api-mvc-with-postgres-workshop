@@ -1,116 +1,394 @@
-openapi: 3.0.3
-info:
-  title: Java API Exercise - Core Criteria
-  description: |-
-  version: 0.2.2
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Java API MVC With Postgres Workshop - Core Criteria",
+    "description": "",
+    "version": "0.2.2"
+  },
 
-servers:
-  - url: http://localhost:4000
-tags:
-  - name: examples
-paths:
-  /examples:
-    post:
-      tags:
-        - examples
-      summary: Example POST route
-      description: Description of an example POST route
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateExample'
-      responses:
-        201:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Example'
-    get:
-      tags:
-        - examples
-      summary: Example GET route
-      description: Description of an example GET route
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AllExamples'
-  /examples/{id}:
-    put:
-      tags:
-        - examples
-      summary: Example PUT route
-      description: Description of an example PUT route
-      parameters:
-        - name: id
-          in: path
-          description: The ID of the example to update
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateExample'
-      responses:
-        201:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Example'
-    delete:
-      tags:
-        - examples
-      summary: Example DELETE route
-      description: Description of an example DELETE route
-      parameters:
-        - name: id
-          in: path
-          description: The ID of the example to delete
-          required: true
-          schema:
-            type: integer
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Example'
-
-components:
-  schemas:
-    CreateExample:
-      type: object
-      required: [propertyOne, propertyTwo]
-      properties:
-        propertyOne:
-          type: string
-          example: "Example Value"
-        propertyTwo:
-          type: email
-          format: email
-          example: "example@email.value"
-    Example:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        propertyOne:
-          type: string
-          example: "Example Value"
-        propertyTwo:
-          type: string
-          example: "example@email.value"
-        createdAt:
-          type: string
-          format: DateTime
-          pattern: YYYY-MM-DDTHH:MM:SS
-          example: 2023-03-14T11:01:56.633+00:00
-    AllExamples:
-      type: array
-      items:
-        $ref: '#/components/schemas/Example'
+    "servers": [
+      {
+        "url": "http://localhost:4000"
+      }
+    ],
+    "tags": [
+      {
+        "name": "customers"
+      },
+      {
+        "name": "stock"
+      }
+    ],
+    "paths": {
+      "/customers": {
+        "post": {
+          "tags": [
+            "customers"
+          ],
+          "summary": "Create a Customer",
+          "description": "Add a new customer to the list",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCustomer"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "customers"
+          ],
+          "summary": "Get all customers",
+          "description": "Get all customers from the list",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AllCustomers"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customers/{id}": {
+        "get": {
+          "tags": [
+            "customers"
+          ],
+          "summary": "Get a customer",
+          "description": "Get a single customer by their id",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "customers"
+          ],
+          "summary": "Update a customer",
+          "description": "Update a customer's details using the id provided. Just update the first customer found in the list with the provided details.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "The id of the customer to update",
+              "required": true,
+              "schema": {
+                "type": "long"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCustomer"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "customers"
+          ],
+          "summary": "Delete a customer",
+          "description": "Remove a customer from the list and send that customer back to the client",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "The id of the customer to delete",
+              "required": true,
+              "schema": {
+                "type": "long"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/stock": {
+        "post": {
+          "tags": [
+            "stock"
+          ],
+          "summary": "Create a stock item",
+          "description": "Add a new stock item to the list",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateStock"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StockItem"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "stock"
+          ],
+          "summary": "Get all stock items",
+          "description": "Get all stock items from the list",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AllStock"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/stock/{id}": {
+        "get": {
+          "tags": [
+            "stock"
+          ],
+          "summary": "Get a stock item",
+          "description": "Get a single stock item by id",
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StockItem"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "stock"
+          ],
+          "summary": "Update a stock item",
+          "description": "Update a stock. Just update the first stock item found in the list with the provided id.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "The id of the stock item to update",
+              "required": true,
+              "schema": {
+                "type": "long"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateStockItem"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StockItem"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "stock"
+          ],
+          "summary": "Delete a stock item",
+          "description": "Remove a stock item from the list and send that item back to the client",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "The id of the item to delete",
+              "required": true,
+              "schema": {
+                "type": "long"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/StockItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "CreateCustomer": {
+          "type": "object",
+          "required": [
+            "name",
+            "address",
+            "email",
+            "phoneNumber"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "Dave Ames"
+            },
+            "address": {
+              "type": "string",
+              "example": "22 Acacia Avenue, Bacup, UK"
+            },
+            "email": {
+              "type": "string",
+              "example": "dave@dave.com"
+            },
+            "phoneNumber": {
+              "type": "string",
+              "example": "01706123456"
+            }
+          }
+        },
+        "Customer": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "Dave Ames"
+            },
+            "address": {
+              "type": "string",
+              "example": "22 Acacia Avenue, Bacup, UK"
+            },
+            "email": {
+              "type": "string",
+              "example": "dave@dave.com"
+            },
+            "phoneNumber": {
+              "type": "string",
+              "example": "01706123456"
+            }
+          }
+        },
+        "AllCustomers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Customer"
+          }
+        },
+        "CreateStockItem": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "Keyboard"
+            },
+            "description": {
+              "type": "string",
+              "example": "Input device for a computer"
+            },
+            "price": {
+              "type": "double",
+              "example": "19.99"
+            }
+          }
+        },
+        "StockItem": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "Keyboard"
+            },
+            "description": {
+              "type": "string",
+              "example": "Input device for a computer"
+            },
+            "price": {
+              "type": "double",
+              "example": "19.99"
+            }
+          }
+        },
+        "AllStockItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/StockItem"
+          }
+        }
+      }
+    }
+  }
+}
