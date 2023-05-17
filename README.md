@@ -343,15 +343,13 @@ public class Main {
 
 Using the Customer Repository we can follow the same process we used when creating an in-memory SpringBoot application to create endpoints that communicate with the database via an API. The code for this is in the CustomerController file which we'll talk through now.
 
-There is a specification for the Customer API here: [Add the API Doc]
+There is a specification for the Customer and Stock APIs here: [API Doc](https://boolean-uk.github.io/java-api-mvc-with-postgres-workshop/)
 
 ## Exercise
 
-Once you have a working Customer API, add in StockItem, StockRepository and StockController classes and implement the API for Stock, you will need to create the relevant table in ElephantSQL and query it from your Java code in exactly the same way we did with the Customers.
+Once you have a working Customer API, add in StockItem, StockRepository and StockController classes and implement the API for Stock, you will need to create the relevant table in ElephantSQL and query it from your Java code in exactly the same way we did with the Customers. The API descriptions are here: [API Doc](https://boolean-uk.github.io/java-api-mvc-with-postgres-workshop/)
 
 Once you have the classes working locally add the SpringBoot code to the StockController class to make everything work.
-
-Full API specification is here.
 
 
 
