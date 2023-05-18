@@ -1,4 +1,4 @@
-# Java API Exercise
+# Java API Using MVC with a Postgres Database Workshop
 
 ## Learning Objectives
 - Use the MVC pattern with Spring Boot to communicate with a Postgres database
