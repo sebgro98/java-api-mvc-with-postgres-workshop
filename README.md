@@ -13,13 +13,13 @@
 4. Run `flyway -cleanDisabled=false clean` at the command line to drop all of the tables currently in the database. 
 5. Create the first migration file to define a new Customer Table that matches the following:
 
-| Customer |              |          |
-|----------|--------------|----------|
-| ID       | Serial       | PK       |
-| Name     | VarChar(250) | NOT NULL |
-| Address  | VarChar(500) | NOT NULL |
-| Email    | VarChar(200) | NOT NULL |
-| Phone    | VarChar(30)  |          |
+| Customer |        |          |
+|----------|--------|----------|
+| ID       | SERIAL | PK       |
+| Name     | TEXT   | NOT NULL |
+| Address  | TEXT   | NOT NULL |
+| Email    | TEXT   | NOT NULL |
+| Phone    | TEXT   |          |
 
 6. Then add a second migration script which can be run after the first one and will populate the table with some initial dummy data.
 
@@ -33,7 +33,7 @@
 
 Don't put a value for the ID when inserting the data as that field will be auto-generated.
 
-7. Run the migrations and then use TablePlus to check the table and data are in the database and that any previous tables have been dropped.
+7. Run the migrations and then use Beekeeper Studio to check the table and data are in the database and that any previous tables have been dropped.
 
 ## Adding the Database Connection to the Java Project
 
@@ -47,10 +47,12 @@ Don't put a value for the ID when inserting the data as that field will be auto-
 
 ```groovy
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	// https://mvnrepository.com/artifact/org.postgresql/postgresql
-	implementation 'org.postgresql:postgresql:42.6.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation 'org.postgresql:postgresql:42.7.3'
 }
 ```
 
@@ -72,7 +74,7 @@ dependencies {
 
 6. Let's start by testing out if we can reach the database from our CustomerRepository class.
 
-**WARNING: MAKE SURE YOU ADD THE FOLLOWING TO .GITIGNORE OTHERWISE YOUR PERSONAL LOGIN TO ELEPHANTSQL WILL BE SHARED WITH THE WORLD!!!!!!!!**
+**WARNING: MAKE SURE YOU ADD THE FOLLOWING TO .GITIGNORE OTHERWISE YOUR PERSONAL LOGIN TO NEON WILL BE SHARED WITH THE WORLD!!!!!!!!**
 
 7. Open the `.gitignore` file and add the following lines to the bottom of it:
 
@@ -85,20 +87,85 @@ report.html.json
 
 this will make git ignore any files anywhere in your Project that end with `.properties` (it also adds two files to be ignored that running flyway generates).
 
-8. In the `resources` folder inside the src->main folder create a new file called `config.properties`. We're going to add our ElephantSQL connection details in here so that we can then read them into our code, without actually sharing them with anyone else. Open the new file and add the following to it:
+8. In the `resources` folder inside the src->main folder create a new file called `config.properties`. We're going to add our Neon connection details in here so that we can then read them into our code, without actually sharing them with anyone else. If you click on the dropdown in the Connection Details part of the Neon Dashboard, it will show you the 4 values you will need to fill in the following. Open the new file and add the following to it:
 
 ```
-db.url=<Value for Server (without brackets) from ElephantSQL Details page>
-db.user=<Value for User & Default database from ElephantSQL Details page>
-db.password=<Value for Password from ElephantSQL Details page>
-db.database=<Value for User & Default database from ElephantSQL Details page>
+db.url=<Value for PGHOST>
+db.user=<Value for PGUSER>
+db.password=<Value for PGPASSWORD>
+db.database=<Value for PGDATABASE>
 ```
 
-replace the items in angle brackets with the details from your ElephantSQL account (you need to remove the angle brackets too).
+replace the items in angle brackets with the details from your Neon account (you need to remove the angle brackets too).
 
-9. Open the CustomerRepository class and add the following code to make Java read in the details from the properties file we created, populate some fields with those values, create a connection to the database and then read all of the Customers table data into a variable called results which we then iterate through displaying the results as we go.
+9. Open the CustomerRepository class and add the following code to make Java read in the details from the properties file we created, populate some fields with those values, and create a connection to the database:
 
-10. Make a `main()` method in a `Main` class if it doesn't already exist and change the code so that it contains the following:
+```java
+import javax.sql.DataSource;
+import org.postgresql.ds.PGSimpleDataSource;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.Properties;
+
+
+public class CustomerRepository {
+    DataSource datasource;
+    String dbUser;
+    String dbURL;
+    String dbPassword;
+    String dbDatabase;
+    Connection connection;
+
+    public CustomerRepository() throws SQLException {
+        this.getDatabaseCredentials();
+        this.datasource = this.createDataSource();
+        this.connection = this.datasource.getConnection();
+    }
+
+    private void getDatabaseCredentials() {
+        try (InputStream input = new FileInputStream("src/main/resources/config.properties")) {
+            Properties prop = new Properties();
+            prop.load(input);
+            this.dbUser = prop.getProperty("db.user");
+            this.dbURL = prop.getProperty("db.url");
+            this.dbPassword = prop.getProperty("db.password");
+            this.dbDatabase = prop.getProperty("db.database");
+        } catch (Exception e) {
+            System.out.println("Oops: " + e);
+        }
+    }
+
+    private DataSource createDataSource() {
+        // The url specifies the address of our database along with username and password credentials
+        // you should replace these with your own username and password
+        final String url = "jdbc:postgresql://" + this.dbURL + ":5432/" + this.dbDatabase + "?user=" + this.dbUser + "&password=" + this.dbPassword;
+        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(url);
+        return dataSource;
+    }
+}
+``` 
+
+10.  We also need to add a method called `connectToDatabase` which we can call to read all of the Customers table data into a variable called results which we then iterate through displaying the results as we go.
+
+```java
+public void connectToDatabase() throws SQLException  {
+    PreparedStatement statement = this.connection.prepareStatement("SELECT * FROM Customers");
+
+    ResultSet results = statement.executeQuery();
+
+    while (results.next()) {
+        String id = "" + results.getLong("id");
+        String name = results.getString("name");
+        String address = results.getString("address");
+        System.out.println(id + " - " + name + " - " + address);
+    }
+}
+```
+
+11. Make a `main()` method in a `Main` class if it doesn't already exist and change the code so that it contains the following:
 
 ```java
 package com.booleanuk;
@@ -117,7 +184,7 @@ public class Main {
 }
 ```
 
-11. This tries to create the database connection and output the contents of the table. If you are successful then you should see something like the following:
+This tries to create the database connection and output the contents of the table. If you are successful then you should see something like the following:
 
 ```
 
@@ -140,7 +207,7 @@ At this point you might be thinking that you should just read the data from the 
 
 ## Setting up the Customer Class
 
-Now that we can connect to the database, we're going to make create our `Customer` class so that we can use it to store actual data from the database.
+Now that we can connect to the database, we're going to create our `Customer` class so that we can use it to store actual data from the database.
 
 1. Look at the structure of the `Customer` table it has an id which is a number (a long in this case) and then all of the other fields will be Strings, so in the Customer class add fields to match those values, and a constructor to assign them. This should be fairly straightforward to do:
 
